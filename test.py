@@ -1,7 +1,3 @@
-x= 4
-
-def Check(x):
-    x = 10
-
-Check(x)
-print(x)
+x = {'h':True}
+if x['y']!= True:
+    print("yes")
