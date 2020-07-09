@@ -26,7 +26,7 @@ class ChessBoard:
         self.square_x_coordinates = self.square_y_coordinates = [i*self.square_side for i in range(8)]
         # self.square_positions = [] # HOLDS X,Y HISTORY OF SQUARES
 
-        self.squares_with_border = {}
+        self.squares_with_border = []
 
         # MAKING THE RECTANGLE
         self.surface = surface
@@ -40,9 +40,11 @@ class ChessBoard:
             # DRAWING SQUARE CUM RECTANGLE
             rect_desc = pygame.Rect(self.square_x,self.square_y,self.square_side,self.square_side)
             # self.squares[f"c{i}"] = pygame.draw.rect(surface,color,rect_desc)
+
             pygame.draw.rect(self.surface,color,rect_desc)
-            self.squares[self.cell_name] = [rect_desc,color,[self.square_x,self.square_y]]
-            self.squares_with_border[self.cell_name]=False
+            self.squares[self.cell_name] = [rect_desc,color,(self.square_x,self.square_y),{"image-onit":False}]
+
+            # self.squares_with_border[self.cell_name]=False
             # self.square_positions.append((self.square_x,self.square_y))
             
             # CHECKING WHETHER TO GO TO NEXT LINE
@@ -74,29 +76,61 @@ class ChessBoard:
         self.cell_name = f"c{self.current_column}-r{self.current_row}"
        
     def DrawBorder(self,**kwargs):
-        border_rect = self.squares[kwargs["cell"]]
+        if len(self.squares_with_border)>1:
+            for item in self.squares_with_border:
+                del self.squares_with_border[self.squares_with_border.index(item)]       
+
+        border_rect = self.squares[kwargs['cell']]
         border_color = kwargs["border_color"]
         pygame.draw.rect(self.surface,border_color,border_rect[0]) 
         pygame.draw.rect(self.surface,border_rect[1],border_rect[0].inflate(-10,-10)) 
-        self.squares_with_border[kwargs["cell"]] = True
+        self.squares_with_border.append(kwargs['cell'])
 
     def RemoveBorder(self,cell):
         cell_to_remove_border = self.squares[cell] 
         pygame.draw.rect(self.surface,cell_to_remove_border[1],cell_to_remove_border[0])
-        self.squares_with_border[cell]=False
+        del self.squares_with_border[self.squares_with_border.index(cell)]
 
+    def MoveBorder(self,**kwargs):
+        cell_name = kwargs['cell']
+        cell_border = kwargs['border_color']
+        for item in self.squares_with_border:
+            self.RemoveBorder(item)
+        self.DrawBorder(cell=cell_name,border_color=cell_border)
+
+    def MoveBorderOnArrow(self,**kwargs):
+        arrow = kwargs["arrow"]
+        cell_to_move = self.squares_with_border[0]
+        cell_to_move = list(cell_to_move)
+        if arrow=="up" or arrow=="u":
+            if cell_to_move[4]!="1":
+                cell_to_move[4]=str(int(cell_to_move[4])-1)
+
+        elif arrow=="down" or arrow=="d":
+            if cell_to_move[4]!="8":
+                cell_to_move[4]=str(int(cell_to_move[4])+1)
+
+        elif arrow=="left" or arrow=="l":
+            if cell_to_move[1]!="1":
+                cell_to_move[1]=str(int(cell_to_move[1])-1)
+
+        elif arrow=="right" or arrow=="r":
+            if cell_to_move[1]!="8":
+                cell_to_move[1]=str(int(cell_to_move[1])+1)
+        cell_to_move = "".join(cell_to_move)
+        self.MoveBorder(cell=cell_to_move,border_color=kwargs["border_color"])
 
     def GiveCell(self,**kwargs):
-        row_no = column_no = None
+        row_no = column_no = 0
         x,y = kwargs['x'] , kwargs['y']
         for i in range(8):
             checking_row = checking_column = i
             squareX = squareY = self.square_x_coordinates[i]
-            if x-squareX<self.square_side and x-squareX>0:
+            if x-squareX<self.square_side and x-squareX>=0:
                 column_no = checking_column
-            if y-squareY<self.square_side and y-squareY>0:
+            if y-squareY<self.square_side and y-squareY>=0:
                 row_no = checking_row
-            if row_no != None and column_no !=None:
+            if row_no != 0 and column_no !=0:
                 break
 
         row_no+=1
@@ -104,3 +138,8 @@ class ChessBoard:
         cell = f"c{column_no}-r{row_no}"
         return cell
 
+    def TellPos(self,cell):
+        return self.squares[cell][2]
+
+    def TellColor(self,cell):
+        return self.squares[cell][1]
