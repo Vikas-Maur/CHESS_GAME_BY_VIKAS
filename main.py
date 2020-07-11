@@ -1,7 +1,9 @@
 import pygame
 from pygame.locals import *
 from board import ChessBoard
-from pawn import Pawn
+from queen import Queen
+from bishop import Bishop
+from elephant import Elephant
 pygame.init()
 
 
@@ -25,12 +27,12 @@ COLORS = {"green":(0,255,0),"blue":(0,0,255),"red":(255,0,0),"black":(0,0,0),"wh
 KEYS = {"UP":pygame.K_UP,"DOWN":pygame.K_DOWN,"LEFT":pygame.K_LEFT,"RIGHT":pygame.K_RIGHT}
 
 my_chess_board = ChessBoard(screen,SCREEN_WIDTH)
-# img = r"assets/blacks/pawn.png"
-# myelephant = Pawn(direction="up",team="black",surface=screen,board=my_chess_board,img=img,position="c4-r3")
-# myelephant.DrawOnScreen()
-# myelephant.GiveMovableCells()
-# for item in myelephant.movable_cells:
-#      my_chess_board.DrawBorder(cell=item,border_color=COLORS["golden"])
+img = "bishop.png"
+myplayer = Bishop(team="whites",surface=screen,board=my_chess_board,img=img,position="c1-r3")
+myplayer.DrawOnScreen()
+myplayer.GiveMovableCells()
+for item in myplayer.movable_cells:
+     my_chess_board.DrawBorder(cell=item,border_color=COLORS["golden"])
 
 def GamePlay():
     running = True    

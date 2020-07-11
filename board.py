@@ -4,8 +4,8 @@ from pygame.locals import *
 class ChessBoard:
     def __init__(self,surface,surface_side):
         self.square_side = int(surface_side/8)
-        self.num_rows = 8
-        self.num_columns = 8
+        self.total_rows = 8
+        self.total_columns = 8
         self.square_color = None
 
         # GETTING A DICT OF SQUARE WITH KEY AS 
@@ -33,7 +33,7 @@ class ChessBoard:
         self.GiveBoard()
         
     def GiveBoard(self):    
-        for i in range(self.num_rows*self.num_columns):
+        for i in range(self.total_rows*self.total_columns):
             # CHECKING FOR SQUARE COLOR
             color = self.GiveColor(i)
         
@@ -143,3 +143,6 @@ class ChessBoard:
 
     def TellColor(self,cell):
         return self.squares[cell][1]
+
+    def TellDict(self,cell):
+        return self.squares[cell][3]

@@ -8,15 +8,35 @@ class Elephant(Player):
         self.min_movable_steps = 0
         self.max_steps_in_column_row = 7
 
+    @classmethod
+    def ElephantMoveAlgorithm(cls,self):
+        # SELF.CURRENT_ROW , SELF.CURRENT_COLUMN
+        columns_right = self.board.total_columns - self.current_column
+        columns_left = self.current_column - 1
+        rows_down = self.board.total_rows - self.current_row
+        rows_up = self.current_row - 1
+        moving_range = max(columns_left,columns_right,rows_up,rows_down)
+        for i in range(moving_range):
+            if columns_right>0:
+                movable_column = self.current_column + columns_right
+                columns_right -= 1
+                movable_row = self.current_row
+                self.AddMovableCell(column=movable_column,row=movable_row)
+            if columns_left>0:
+                movable_column = self.current_column - columns_left
+                columns_left -= 1
+                movable_row = self.current_row
+                self.AddMovableCell(column=movable_column,row=movable_row)
+            if rows_down>0:
+                movable_column = self.current_column
+                movable_row = self.current_row + rows_down
+                rows_down -= 1
+                self.AddMovableCell(column=movable_column,row=movable_row)
+            if rows_up>0:
+                movable_column = self.current_column
+                movable_row = self.current_row - rows_up
+                rows_up -= 1
+                self.AddMovableCell(column=movable_column,row=movable_row)
+
     def MoveAlgorithm(self):
-        movable_in_columns = None
-        movable_in_rows = None
-        for i in range(1,8):
-            movable_in_column = f"c{int(self.current_column[1])+i}-{self.current_row}"
-            movable_in_row = f"{self.current_column}-r{int(self.current_row[1])+i}"
-            self.movable_cells.append(movable_in_column)
-            self.movable_cells.append(movable_in_row)
-            movable_in_column2 = f"c{int(self.current_column[1])-i}-{self.current_row}"
-            movable_in_row2 = f"{self.current_column}-r{int(self.current_row[1])-i}"
-            self.movable_cells.append(movable_in_column2)
-            self.movable_cells.append(movable_in_row2)
+        Elephant.ElephantMoveAlgorithm(self)
