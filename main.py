@@ -1,9 +1,8 @@
 import pygame
 from pygame.locals import *
 from board import ChessBoard
-from queen import Queen
-from bishop import Bishop
-from elephant import Elephant
+from teams import blacks
+from teams import whites
 pygame.init()
 
 
@@ -27,12 +26,11 @@ COLORS = {"green":(0,255,0),"blue":(0,0,255),"red":(255,0,0),"black":(0,0,0),"wh
 KEYS = {"UP":pygame.K_UP,"DOWN":pygame.K_DOWN,"LEFT":pygame.K_LEFT,"RIGHT":pygame.K_RIGHT}
 
 my_chess_board = ChessBoard(screen,SCREEN_WIDTH)
-img = "bishop.png"
-myplayer = Bishop(team="whites",surface=screen,board=my_chess_board,img=img,position="c1-r3")
-myplayer.DrawOnScreen()
-myplayer.GiveMovableCells()
-for item in myplayer.movable_cells:
-     my_chess_board.DrawBorder(cell=item,border_color=COLORS["golden"])
+
+myteam = blacks.BlackTeam(surface=screen,board=my_chess_board)
+myteam.DrawAllPlayers()
+myteam2 = whites.WhiteTeam(surface=screen,board=my_chess_board)
+myteam2.DrawAllPlayers()
 
 def GamePlay():
     running = True    
@@ -60,10 +58,9 @@ def GamePlay():
 
             if event.type==pygame.MOUSEBUTTONDOWN:
                 click_x , click_y = pygame.mouse.get_pos()
-                cell_clicked = my_chess_board.GiveCell(x=click_x,y=click_y)
-                my_chess_board.MoveBorder(cell=cell_clicked,border_color=COLORS["red"])
-                # click = pygame.mouse.get_pressed()
-                # print(click)
+                myteam.SetPlayerToMove(x=click_x,y=click_y)
+                myteam2.SetPlayerToMove(x=click_x,y=click_y)
+
              
         pygame.display.update()
 

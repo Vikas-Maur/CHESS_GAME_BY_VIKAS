@@ -1,12 +1,13 @@
 import pygame
-from player import Player
+from player_settings import player
 
-class Elephant(Player):
+class Elephant(player.Player):
     def __init__(self,**kwargs):
-        super(Elephant,self).__init__(**kwargs)
+        super(Elephant,self).__init__(img="elephant.png",**kwargs)
         self.max_movable_steps = 7
         self.min_movable_steps = 0
         self.max_steps_in_column_row = 7
+        self.name = "elephant"
 
     @classmethod
     def ElephantMoveAlgorithm(cls,self):

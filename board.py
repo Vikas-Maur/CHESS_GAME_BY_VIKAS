@@ -13,9 +13,9 @@ class ChessBoard:
         self.squares = {}
 
         # DEFINING COLOR ASPECT
-        self.white = (255,255,255)
-        self.black = (0,0,0)
-        self.colors = [self.white,self.black]
+        self.color1 = (220,100,0)
+        self.color2 = (240,150,0)
+        self.colors = [self.color1,self.color2]
 
         # MADE TO GIVE X , Y COORDINATES TO THE RECTANGLES
         self.square_x = 0
@@ -39,14 +39,12 @@ class ChessBoard:
         
             # DRAWING SQUARE CUM RECTANGLE
             rect_desc = pygame.Rect(self.square_x,self.square_y,self.square_side,self.square_side)
-            # self.squares[f"c{i}"] = pygame.draw.rect(surface,color,rect_desc)
 
             pygame.draw.rect(self.surface,color,rect_desc)
-            self.squares[self.cell_name] = [rect_desc,color,(self.square_x,self.square_y),{"image-onit":False}]
+            self.squares[self.cell_name] = {"rect":rect_desc, "color":color,
+                                            "position":(self.square_x, self.square_y),
+                                            "image_on_it": False, "image": None,"image_team":None}
 
-            # self.squares_with_border[self.cell_name]=False
-            # self.square_positions.append((self.square_x,self.square_y))
-            
             # CHECKING WHETHER TO GO TO NEXT LINE
             self.CheckForBlockPlacement()
             
@@ -76,27 +74,44 @@ class ChessBoard:
         self.cell_name = f"c{self.current_column}-r{self.current_row}"
        
     def DrawBorder(self,**kwargs):
-        if len(self.squares_with_border)>1:
-            for item in self.squares_with_border:
-                del self.squares_with_border[self.squares_with_border.index(item)]       
-
         border_rect = self.squares[kwargs['cell']]
         border_color = kwargs["border_color"]
-        pygame.draw.rect(self.surface,border_color,border_rect[0]) 
-        pygame.draw.rect(self.surface,border_rect[1],border_rect[0].inflate(-10,-10)) 
+        pygame.draw.rect(self.surface,border_color,border_rect["rect"])
+        pygame.draw.rect(self.surface,border_rect["color"],border_rect["rect"].inflate(-10,-10))
         self.squares_with_border.append(kwargs['cell'])
 
     def RemoveBorder(self,cell):
         cell_to_remove_border = self.squares[cell] 
-        pygame.draw.rect(self.surface,cell_to_remove_border[1],cell_to_remove_border[0])
+        pygame.draw.rect(self.surface,cell_to_remove_border["color"],cell_to_remove_border["rect"])
+        if cell_to_remove_border["image_on_it"]:
+            image = cell_to_remove_border["image"]
+            x = cell_to_remove_border["position"][0]
+            y = cell_to_remove_border["position"][1]
+            self.surface.blit(image,(x,y))
         del self.squares_with_border[self.squares_with_border.index(cell)]
+
+    def RemoveBorderFromAllCells(self):
+        deletable_cells = self.squares_with_border.copy()
+        for cell in deletable_cells:
+            self.RemoveBorder(cell)
 
     def MoveBorder(self,**kwargs):
         cell_name = kwargs['cell']
         cell_border = kwargs['border_color']
-        for item in self.squares_with_border:
-            self.RemoveBorder(item)
+        if len(self.squares_with_border)==1:
+            self.RemoveBorder(self.squares_with_border[0])
         self.DrawBorder(cell=cell_name,border_color=cell_border)
+
+    def MoveAllBorders(self,**kwargs):
+        cell_to_remove_border = kwargs["remove_border"]
+        try:
+            for cell in cell_to_remove_border:
+                self.RemoveBorder(cell)
+        except:
+            pass
+        cell_to_add_border = kwargs["add_border"]
+        for cell in cell_to_add_border:
+            self.DrawBorder(cell=cell,border_color=kwargs["border_color"])
 
     def MoveBorderOnArrow(self,**kwargs):
         arrow = kwargs["arrow"]
@@ -138,11 +153,54 @@ class ChessBoard:
         cell = f"c{column_no}-r{row_no}"
         return cell
 
-    def TellPos(self,cell):
-        return self.squares[cell][2]
+    def GiveSquareDetails(self,**kwargs):
+        cell = kwargs["cell"]
+        returning_parameter = self.CheckReturningParameter(kwargs["parameter"])
+        given_square = self.squares[cell]
+        try:
+            if kwargs["change"]==True or kwargs["change"]=="true" or kwargs["change"]=="True":
+                changing_value = kwargs["change_value"]
+                self.squares[cell][returning_parameter] = changing_value
+            else:
+                return given_square[returning_parameter]
+        except:
+            return given_square[returning_parameter]
 
-    def TellColor(self,cell):
-        return self.squares[cell][1]
+    def CheckReturningParameter(self,parameter):
+        if "p" in parameter:
+            if parameter=="pos" or parameter=="position" or parameter=="p":
+                return "position"
+        elif "c" in parameter:
+            if parameter=="color" or parameter=="c":
+                return "color"
+        elif "r" in parameter:
+            if parameter=="rect_desc" or parameter=="rect" or parameter=="r":
+                return "rect"
+        elif "i" in parameter:
+            if parameter=="imageonit" or parameter=="image-onit" or parameter=="image-on-it" or parameter=="image_on_it" or parameter=="image_onit":
+                return "image_on_it"
+            elif parameter=="image":
+                return "image"
+            elif parameter=="image_team" or parameter=="img_team" or parameter=="img-team" or parameter=="image-team":
+                return "image_team"
+        else:
+            raise Exception("THE GIVEN PARAMETER IS NOT PRESENT IN SELF.SQUARES CHECK THE INPUT")
 
-    def TellDict(self,cell):
-        return self.squares[cell][3]
+    def ChangeImageOnSquareSettings(self,**kwargs):
+        cell_to_change = kwargs["cell"]
+        image_on_it = kwargs["image"]
+        self.squares[cell_to_change]["image_on_it"] = True
+        self.squares[cell_to_change]["image"] = image_on_it
+
+    def GiveNearbyCells(self,cell):
+        cell_column = int(cell[1])
+        cell_row = int(cell[-1])
+        nearby_columns = [0,1,-1]
+        nearby_row = [0,1,-1]
+        nearby_cells = [f"c{col+cell_column}-r{row+cell_row}" for col in nearby_columns for row in nearby_row]
+        del nearby_cells[0]
+        check_nearby_cells = nearby_cells.copy()
+        for cell in check_nearby_cells:
+            if ("c9" in cell or "r9" in cell or "c0" in cell or "r0" in cell):
+                nearby_cells.remove(cell)
+        return nearby_cells

@@ -1,12 +1,13 @@
 import pygame
-from player import Player
+from player_settings import player
 
-class Bishop(Player):
+class Bishop(player.Player):
     def __init__(self,**kwargs):
-        super(Bishop,self).__init__(**kwargs)
+        super(Bishop,self).__init__(img="bishop.png",**kwargs)
         self.max_movable_steps = 7
         self.min_movable_steps = 0
         self.max_steps_in_column_row = 7
+        self.name = "bishop"
 
     @classmethod
     def BishopMoveAlgorithm(cls,self):

@@ -1,12 +1,12 @@
-import pygame
-from player import Player
+from player_settings import player
 
-class King(Player):
+class King(player.Player):
     def __init__(self,**kwargs):
-        super(King,self).__init__(**kwargs)
+        super(King,self).__init__(img="king.png",**kwargs)
         self.max_movable_steps = 1
         self.min_movable_steps = 0
         self.max_steps_in_column_row = 1
+        self.name = "king"
 
     def MoveAlgorithm(self):
         move_from = [self.current_column,self.current_row]
