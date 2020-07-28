@@ -6,7 +6,6 @@ class King(player.Player):
         self.max_movable_steps = 1
         self.min_movable_steps = 0
         self.max_steps_in_column_row = 1
-        self.name = "king"
 
     def MoveAlgorithm(self):
         move_from = [self.current_column,self.current_row]

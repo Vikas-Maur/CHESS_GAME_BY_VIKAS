@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import *
+from player_settings import player
 
 class ChessBoard:
     def __init__(self,surface,surface_side):
@@ -174,10 +174,10 @@ class ChessBoard:
             if parameter=="color" or parameter=="c":
                 return "color"
         elif "r" in parameter:
-            if parameter=="rect_desc" or parameter=="rect" or parameter=="r":
+            if parameter=="rect_desc" or parameter=="rectangle" or parameter=="rect" or parameter=="r":
                 return "rect"
         elif "i" in parameter:
-            if parameter=="imageonit" or parameter=="image-onit" or parameter=="image-on-it" or parameter=="image_on_it" or parameter=="image_onit":
+            if parameter=="imageonit" or parameter=="image-onit" or parameter=="image-on-it" or parameter=="image_on_it" or parameter=="img_on_it" or parameter=="image_onit":
                 return "image_on_it"
             elif parameter=="image":
                 return "image"
@@ -204,3 +204,9 @@ class ChessBoard:
             if ("c9" in cell or "r9" in cell or "c0" in cell or "r0" in cell):
                 nearby_cells.remove(cell)
         return nearby_cells
+
+    def DrawASquare(self,**kwargs):
+        cell_to_draw = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
+        rect_to_draw = self.GiveSquareDetails(change=False,parameter="r",cell=cell_to_draw)
+        rect_color = self.GiveSquareDetails(change=False,parameter="color",cell=cell_to_draw)
+        pygame.draw.rect(self.surface,rect_color,rect_to_draw)

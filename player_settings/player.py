@@ -24,7 +24,7 @@ class Player:
         self.max_movable_steps = None
         self.min_movable_steps = None
         self.max_steps_in_column_row = None
-        self.name = None
+        self.name = kwargs["name"]
 
     def DrawOnScreen(self):
         value = self.board.GiveSquareDetails(change=False,cell=self.position,parameter="pos")
@@ -39,31 +39,6 @@ class Player:
 
     def MoveAlgorithm(self):
         return "PLAYER OBJECT HAS NO ALGORITHM OF ITS OWN"
-
-    def GiveMovableCells(self):
-        self.MoveAlgorithm()
-        deletables = []
-        for cell in self.movable_cells:
-            try:
-                test_for_deletable_cell = self.board.squares[cell]
-                if test_for_deletable_cell["image_on_it"]:
-                    deletables.append(cell)
-            except:
-                deletables.append(cell)
-        check_for_nearby_cells = self.board.GiveNearbyCells(self.position)
-        checking_num_cells = 0
-        not_horse = True
-        if self.name=="horse":
-            not_horse = False
-        if not_horse:
-            for cell in check_for_nearby_cells:
-                if cell in deletables or cell not in self.movable_cells:
-                    checking_num_cells += 1
-        if checking_num_cells == len(check_for_nearby_cells):
-            deletables = self.movable_cells.copy()
-
-        for cell in deletables:
-            self.movable_cells.remove(cell)
 
     def AddMovableCell(self,**kwargs):
         try :
@@ -85,8 +60,10 @@ class Player:
         self.AddMovableCell(row=moving_row, column=moving_column)
 
     def MovePlayer(self,**kwargs):
-        self.board.GiveSquareDetails(change=True,parameter="image",change_value=None)
-        self.board.GiveSquareDetails(change=True,parameter="image-onit",change_value=False)
+        self.board.GiveSquareDetails(change=True,cell=self.position,parameter="image",change_value=None)
+        self.board.GiveSquareDetails(change=True,cell=self.position,parameter="image-onit",change_value=False)
+        self.board.DrawASquare(cell=self.position)
+
         cell_no = Player.CheckInput_GIVE_CELL(self,**kwargs)
         self.DefineCurrentPosition(cell_no)
         self.DrawOnScreen()
@@ -103,7 +80,9 @@ class Player:
 
     def DrawBorderOnMovableCells(self):
         for cells  in self.movable_cells:
-            self.board.DrawBorder(cell=cells,border_color=(0,0,0))
+            img_onit = self.board.GiveSquareDetails(cell=cells,parameter="image_on_it",change=False)
+            if not img_onit:
+                self.board.DrawBorder(cell=cells,border_color=(0,0,0))
 
     def SelectPlayer(self,**kwargs):
         self.GiveMovableCells()
@@ -126,3 +105,41 @@ class Player:
         self.image_width += extra_width
         self.image_height += extra_height
         self.image = pygame.transform.scale(self.image,(self.image_width,self.image_height))
+
+    def GiveMovableCells(self):
+        self.movable_cells = []
+        self.MoveAlgorithm()
+        deletables = self.ImgBlockingMovableCells()
+        check_for_even_one_step_possible = self.CheckForImageOnNearbyCells(deletables=deletables)
+        deletables.extend(check_for_even_one_step_possible)
+        deletables = list(set(deletables))
+        for cell in deletables:
+            self.movable_cells.remove(cell)
+
+    def ImgBlockingMovableCells(self):
+        deletables = []
+        for cell in self.movable_cells:
+            try:
+                test_for_deletable_cell = self.board.squares[cell]
+                test_for_deletable_cell_image_team = self.board.GiveSquareDetails(change=False, cell=cell,
+                                                                                  parameter="img_team")
+                if test_for_deletable_cell["image_on_it"] and test_for_deletable_cell_image_team == self.team:
+                    deletables.append(cell)
+            except:
+                deletables.append(cell)
+        return deletables
+
+    def CheckForImageOnNearbyCells(self,**kwargs):
+        deletables = kwargs["deletables"].copy()
+        check_for_nearby_cells = self.board.GiveNearbyCells(self.position)
+        checking_num_cells = 0
+        not_horse = True
+        if "h" in self.name :
+            not_horse = False
+        if not_horse:
+            for cell in check_for_nearby_cells:
+                if cell in deletables or cell not in self.movable_cells:
+                    checking_num_cells += 1
+        if checking_num_cells == len(check_for_nearby_cells):
+            deletables = self.movable_cells.copy()
+        return deletables

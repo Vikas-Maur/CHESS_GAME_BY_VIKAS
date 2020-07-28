@@ -27,10 +27,13 @@ KEYS = {"UP":pygame.K_UP,"DOWN":pygame.K_DOWN,"LEFT":pygame.K_LEFT,"RIGHT":pygam
 
 my_chess_board = ChessBoard(screen,SCREEN_WIDTH)
 
-myteam = blacks.BlackTeam(surface=screen,board=my_chess_board)
-myteam.DrawAllPlayers()
-myteam2 = whites.WhiteTeam(surface=screen,board=my_chess_board)
-myteam2.DrawAllPlayers()
+blacks_team = blacks.BlackTeam(surface=screen,board=my_chess_board)
+blacks_team.DrawAllPlayers()
+whites_team = whites.WhiteTeam(surface=screen,board=my_chess_board)
+whites_team.DrawAllPlayers()
+
+blacks_team.opponent = whites_team
+whites_team.opponent = blacks_team
 
 def GamePlay():
     running = True    
@@ -56,10 +59,19 @@ def GamePlay():
                 if event.key== KEYS["LEFT"] and len(my_chess_board.squares_with_border)==1: # KEY : 276
                     my_chess_board.MoveBorderOnArrow(arrow="l",border_color=COLORS["red"])
 
+                if event.key== pygame.K_l:
+                    if whites_team.team_chance:
+                        whites_team.player_selected = True
+                    else:
+                        blacks_team.player_selected = True
+
+                if event.key== pygame.K_r:
+                    my_chess_board.RemoveBorderFromAllCells()
+
             if event.type==pygame.MOUSEBUTTONDOWN:
                 click_x , click_y = pygame.mouse.get_pos()
-                myteam.SetPlayerToMove(x=click_x,y=click_y)
-                myteam2.SetPlayerToMove(x=click_x,y=click_y)
+                whites_team.SelectOrMovePlayer(x=click_x,y=click_y)
+                blacks_team.SelectOrMovePlayer(x=click_x,y=click_y)
 
              
         pygame.display.update()

@@ -26,14 +26,14 @@ class TeamSettings:
         self.players = self.SetTheTeam()
         self.team_chance = False
         self.current_player_moving = None
-
-        self.opponent_team = kwargs["opponent"]
+        self.player_selected = False
+        self.opponent = None
 
     def SetTheTeam(self):
         my_team = {}
         for player in self.total_players:
             current_class = self.player_classes[player[0]]
-            my_team[player] = current_class(team=self.team,surface=self.surface,board=self.board,position=self.starting_pos[player])
+            my_team[player] = current_class(team=self.team,name=player,surface=self.surface,board=self.board,position=self.starting_pos[player])
         return my_team
 
     def DrawAllPlayers(self):
@@ -42,22 +42,23 @@ class TeamSettings:
 
     def SetPlayerToMove(self,**kwargs):
         if  self.team_chance:
-            cell_clicked = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
-            for gamer in self.total_players:
-                current_player = self.players[gamer]
-                if current_player.position==cell_clicked:
-                    self.current_player_moving = player
-                    current_player.SelectPlayer(cell=current_player.position)
+            if not self.player_selected:
+                cell_clicked = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
+                for gamer in self.total_players:
+                    current_player = self.players[gamer]
+                    if current_player.position==cell_clicked:
+                        self.current_player_moving = current_player
+                        self.current_player_moving.SelectPlayer(cell=current_player.position)
+
 
     def MovePlayer(self,**kwargs):
         cell_clicked = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
-        if not self.CheckSelfTeamPlayerPosition(**kwargs) and self.team_chance:
-            moving_player = self.players[self.current_player_moving]
-            moving_player.MovePlayer(cell=cell_clicked)
+        if cell_clicked in self.current_player_moving.movable_cells:
+            self.current_player_moving.MovePlayer(cell=cell_clicked)
+            self.player_selected = False
+            self.board.RemoveBorderFromAllCells()
+            self.opponent.team_chance = True
             self.team_chance = False
-            return self.CheckOtherTeamPlayerPosition(**kwargs)
-        else:
-            return False
 
     def CheckSelfTeamPlayerPosition(self,**kwargs):
         cell_clicked = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
@@ -69,8 +70,8 @@ class TeamSettings:
 
     def CheckOtherTeamPlayerPosition(self,**kwargs):
         cell_clicked = player.Player.CheckInput_GIVE_CELL(self,**kwargs)
-        for opponents in self.opponent_team.total_player:
-            checking_player = self.opponent_team.players[opponents]
+        for opponents in self.opponent.total_player:
+            checking_player = self.opponent.players[opponents]
             if checking_player.position == cell_clicked:
                 return True
         return False
@@ -90,3 +91,13 @@ class TeamSettings:
                 row += change_in_row
             starting_position = f"c{col}-r{row}"
         return player_pos
+
+    def SelectOrMovePlayer(self,**kwargs):
+        x , y = kwargs['x'] , kwargs['y']
+        if self.team_chance:
+            if self.player_selected:
+                self.MovePlayer(x=x,y=y)
+            else:
+                self.SetPlayerToMove(x=x,y=y)
+        else:
+            return

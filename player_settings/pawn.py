@@ -10,7 +10,6 @@ class Pawn(player.Player):
         self.moving_direction = self.ReturnMovingDirection()
         self.killing = False
         super(Pawn, self).ResizePlayerImage(width=-10,height=-10)
-        self.name = "pawn"
 
     def MoveAlgorithm(self):
         if self.moving_direction=="down" or self.moving_direction=="d":

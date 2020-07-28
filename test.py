@@ -1,2 +1,1 @@
-x = []
-print(len(x))
+print(abs(-10))
